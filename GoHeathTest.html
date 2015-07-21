@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>GoHealth Test</title>
+	
+	<!-- Included JavaScript Libraries (jQuery, Lo-Dash) -->
+	<!-- Require Internet Access -->
+	<script src="https://code.jquery.com/jquery-2.1.4.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
+
+	<!-- Setup style for displayed table -->
+	<style type="text/css">
+		table {
+			border-spacing: 0px;
+			border-collapse: collapse;
+		}
+
+		tr:nth-child(even) {
+			background-color: #9cf;
+		}
+		tr:nth-child(odd) {
+			background-color: #cff;
+		}
+
+		th {
+			background-color: #f60;
+			color: #fff;
+			padding: 5px;
+			border: solid .1px #fff;
+		}
+
+		td {
+			color: #000;
+			padding: 5px;
+			border: solid .1px #fff;
+		}
+	</style>
+
+	<script type="text/javascript">
+
+		// Custom JS function to convert an integer to currency.
+		var formatCurrency = function(currency) {
+
+			// Sets up boolean to check for a negative amount.
+		    var negNum = false;
+
+		    // Checks to see if currency is negative.
+		    if(currency < 0) {
+
+		    	// Sets boolean to true if currency is less than zero
+		        negNum = true;
+		        // Converts currency to a positive number.
+		        currency = Math.abs(currency);
+		    }
+
+		    // Appends a "-$" or "$" and formats the amount to a float value with two decimal places.
+		    return (negNum ? '-$' : '$') + parseFloat(currency, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString();
+		}
+
+		// Pulls data from JSON file.
+		$.getJSON( "healthPlans.json", function( data ) {
+
+			// Uses Lodash to sort data by carrierName
+			var sorted = _.sortBy(data, "carrierName")
+
+			// Creates an array to push code to.  I presume this could also be done with a basic string.
+		  	var healthPlans = [];
+
+		  	// Iterates through the JSON objects.
+		  	$.each( sorted, function( key, val ) {
+
+		  		// Adds header for the first object.
+			  	if(key === 0) {
+			    	healthPlans.push( "<tr>" );
+		  			$.each( val, function ( objKey, objVal ) {
+			    		healthPlans.push( "<th></th><th id='" + objKey + "'>" + objKey + "</th>" );
+        			});
+			    	
+			    	// Adds closing row tags.
+			    	healthPlans.push( "<th></th></tr>" );
+			    }
+		    	
+		    	// Opens new row tag for each collection of values.
+		    	healthPlans.push( "<tr>" );
+
+		  		$.each( val, function ( objKey, objVal ) {
+
+		  			// Checks for premium and annualLimit keys.
+		  			if( objKey === "premium" || objKey === "annualLimit" ) {
+
+		  				// Converts premium and annualLimit values to US Currency format.
+		  				objVal = formatCurrency(objVal);
+		  			}
+
+		  			// Displays values in table.
+			    	healthPlans.push( "<td></td><td id='" + objKey + key + "'>" + objVal + "</td>" );
+        		});
+
+		  		// Closes row tag for each collection of values.
+		    	healthPlans.push( "<td></td></tr>" );
+		  	});
+		 	
+		 	// Adds table to body element.
+		  	$( "<table>", {
+
+		  		// Joins the array values together wtih a blank value.
+		    	html: healthPlans.join( "" )
+		  	}).appendTo( "body" );
+		});	
+	</script>
+</head>
+<body>
+</body>
+</html>
